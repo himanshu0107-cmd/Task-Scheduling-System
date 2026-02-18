@@ -1,39 +1,39 @@
 package com.promanage;
 
-import java.util.*;
+import java.util.List;
 
 public class Scheduler {
 
     public static void generateSchedule(List<Project> projects) {
 
-        projects.sort((a, b) -> b.getRevenue() - a.getRevenue());
+        int n = projects.size();
+        int maxDays = 5;
 
-        Project[] week = new Project[5];
-        int totalRevenue = 0;
+        
+        int[][] dp = new int[n + 1][maxDays + 1];
 
-        for (Project p : projects) {
+        
+        for (int i = 1; i <= n; i++) {
 
-            int lastDay = Math.min(p.getDeadline(), 5) - 1;
+            Project p = projects.get(i - 1);
 
-            for (int j = lastDay; j >= 0; j--) {
-                if (week[j] == null) {
-                    week[j] = p;
-                    totalRevenue += p.getRevenue();
-                    break;
+            for (int d = 1; d <= maxDays; d++) {
+
+                
+                if (p.getDeadline() >= d) {
+
+                    dp[i][d] = Math.max(
+                            dp[i - 1][d],   
+                            p.getRevenue() + dp[i - 1][d - 1]  
+                    );
+
+                } else {
+                    dp[i][d] = dp[i - 1][d];
                 }
             }
         }
 
-        String[] days = {"Monday","Tuesday","Wednesday","Thursday","Friday"};
-
-        System.out.println("\nWeekly Schedule:");
-        for (int i = 0; i < 5; i++) {
-            if (week[i] != null)
-                System.out.println(days[i] + " → " + week[i].getTitle());
-            else
-                System.out.println(days[i] + " → No Project");
-        }
-
-        System.out.println("Total Revenue: " + totalRevenue);
+        System.out.println("\n Using Dynamic Programming ");
+        System.out.println("Maximum Revenue Earned: " + dp[n][maxDays]);
     }
 }
