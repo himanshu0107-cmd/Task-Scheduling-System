@@ -1,20 +1,51 @@
 package com.promanage;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
+import java.sql.*;
+import java.util.*;
 
-public class DBConnection {
+public class ProjectDAO {
 
-    private static final String URL = "jdbc:postgresql://localhost:5432/promanage";
-    private static final String USER = "postgres";
-    private static final String PASSWORD = "Jyoti";
+    public void addProject(String title, int deadline, int revenue) {
 
-    public static Connection getConnection() {
-        try {
-            return DriverManager.getConnection(URL, USER, PASSWORD);
+        String sql = "INSERT INTO projects(title, deadline, revenue) VALUES (?, ?, ?)";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, title);
+            ps.setInt(2, deadline);
+            ps.setInt(3, revenue);
+
+            ps.executeUpdate();
+            System.out.println("Project Added Successfully!");
+
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
         }
+    }
+
+    public List<Project> getAllProjects() {
+
+        List<Project> list = new ArrayList<>();
+        String sql = "SELECT * FROM projects";
+
+        try (Connection con = DBConnection.getConnection();
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+
+            while (rs.next()) {
+                list.add(new Project(
+                        rs.getInt("id"),
+                        rs.getString("title"),
+                        rs.getInt("deadline"),
+                        rs.getInt("revenue")
+                ));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
     }
 }
